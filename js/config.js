@@ -53,13 +53,13 @@ const APP_CONFIG = {
   urgencias: ["Baja", "Media", "Alta", "Crítica"],
 
   categorias: [
-    "Diseño",
-    "Cotización",
-    "Producción",
-    "Instalación",
-    "Licencias y accesos",
+    "CAD",
+    "XML",
+    "Organizer",
+    "INI",
+    "Licencias",
+    "Planos",
     "Reportes",
-    "Otro",
   ],
 
   estados: ["Abierto", "En proceso", "Resuelto", "Cerrado"],

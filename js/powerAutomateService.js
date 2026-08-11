@@ -76,5 +76,9 @@ function mapCasoPA(c) {
     creadoPorNombre: c.creadoPorNombre || c.CreadoPorNombre,
     creadoPorCorreo: c.creadoPorCorreo || c.CreadoPorCorreo,
     fechaCreacion: c.fechaCreacion || c.Created,
+    fechaApertura: c.fechaApertura || c.FechaApertura,
+    fechaCierre: c.fechaCierre || c.FechaCierre,
+    tiempoUsadoHoras: c.tiempoUsadoHoras || c.TiempoUsadoHoras,
+    synergyId: c.synergyId || c.SynergyId,
   };
 }

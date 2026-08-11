@@ -48,6 +48,7 @@ async function crearCaso(caso) {
       Estado: "Abierto",
       CreadoPorNombre: caso.creadoPorNombre,
       CreadoPorCorreo: caso.creadoPorCorreo,
+      FechaApertura: new Date().toISOString(),
     },
   };
   return graphFetch(`/sites/${siteId}/lists/${listId}/items`, {
@@ -151,11 +152,14 @@ async function getTodosCasos() {
  * Se hace con PATCH sobre /fields, igual que el patrón usado en los
  * cotizadores AYJ para campos adicionales tras la creación del item.
  */
-async function actualizarCaso(casoId, { estado, solucion }) {
+async function actualizarCaso(casoId, { estado, solucion, tiempoUsadoHoras, synergyId, fechaCierre }) {
   const { siteId, listId } = APP_CONFIG.sharepoint;
   const fields = {};
   if (estado !== undefined) fields.Estado = estado;
   if (solucion !== undefined) fields.Solucion = solucion;
+  if (tiempoUsadoHoras !== undefined && tiempoUsadoHoras !== "") fields.TiempoUsadoHoras = Number(tiempoUsadoHoras);
+  if (synergyId !== undefined) fields.SynergyId = synergyId;
+  if (fechaCierre !== undefined) fields.FechaCierre = fechaCierre;
 
   return graphFetch(`/sites/${siteId}/lists/${listId}/items/${casoId}/fields`, {
     method: "PATCH",
@@ -178,5 +182,9 @@ function mapListItem(item) {
     creadoPorCorreo: f.CreadoPorCorreo,
     adjuntos: (f.AdjuntosUrls || "").split("\n").filter(Boolean),
     fechaCreacion: f.Created,
+    fechaApertura: f.FechaApertura,
+    fechaCierre: f.FechaCierre,
+    tiempoUsadoHoras: f.TiempoUsadoHoras,
+    synergyId: f.SynergyId,
   };
 }

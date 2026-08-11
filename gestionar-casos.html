@@ -100,7 +100,7 @@
             <div class="caso-item-head">
               <div>
                 <h3>${c.asunto}</h3>
-                <div class="caso-meta">#${c.id} · ${c.creadoPorNombre} (${c.creadoPorCorreo}) · ${new Date(c.fechaCreacion).toLocaleDateString("es-CO")}</div>
+                <div class="caso-meta">#${c.id} · ${c.creadoPorNombre} (${c.creadoPorCorreo}) · Abierto: ${new Date(c.fechaApertura || c.fechaCreacion).toLocaleDateString("es-CO")}${c.fechaCierre ? " · Cerrado: " + new Date(c.fechaCierre).toLocaleDateString("es-CO") : ""}${c.tiempoUsadoHoras ? " · " + c.tiempoUsadoHoras + "h usadas" : ""}${c.synergyId ? " · Synergy: " + c.synergyId : ""}</div>
               </div>
               <span class="badge-pill ${estadoClass}">${c.estado}</span>
             </div>
@@ -119,6 +119,9 @@
               </select>
               <textarea class="input-solucion" placeholder="Solución / respuesta dada al usuario...">${c.solucion || ""}</textarea>
               <button class="btn btn-primary btn-sm btn-guardar">Guardar</button>
+
+              <input type="number" step="0.5" min="0" class="input-tiempo" placeholder="Horas usadas" value="${c.tiempoUsadoHoras || ""}" />
+              <input type="text" class="input-synergy" placeholder="ID Synergy (opcional)" value="${c.synergyId || ""}" />
             </div>
             <div class="guardar-msg" style="font-size:12px;margin-top:6px;"></div>
           </div>
@@ -134,16 +137,30 @@
         btn.addEventListener("click", async () => {
           const nuevoEstado = el.querySelector(".input-estado").value;
           const nuevaSolucion = el.querySelector(".input-solucion").value;
+          const nuevoTiempo = el.querySelector(".input-tiempo").value;
+          const nuevoSynergy = el.querySelector(".input-synergy").value;
+
+          const esCierre = nuevoEstado === "Resuelto" || nuevoEstado === "Cerrado";
+          const fechaCierre = esCierre && !c.fechaCierre ? new Date().toISOString() : undefined;
 
           btn.disabled = true;
           btn.textContent = "Guardando...";
           msg.textContent = "";
 
           try {
-            await actualizarCaso(c.id, { estado: nuevoEstado, solucion: nuevaSolucion });
+            await actualizarCaso(c.id, {
+              estado: nuevoEstado,
+              solucion: nuevaSolucion,
+              tiempoUsadoHoras: nuevoTiempo,
+              synergyId: nuevoSynergy,
+              fechaCierre,
+            });
             msg.innerHTML = `<span style="color:var(--mc-success)">Guardado ✓</span>`;
             c.estado = nuevoEstado;
             c.solucion = nuevaSolucion;
+            c.tiempoUsadoHoras = nuevoTiempo;
+            c.synergyId = nuevoSynergy;
+            if (fechaCierre) c.fechaCierre = fechaCierre;
             const badge = el.querySelector(".badge-pill");
             badge.className = "badge-pill badge-" + nuevoEstado.replace(/\s+/g, "");
             badge.textContent = nuevoEstado;
