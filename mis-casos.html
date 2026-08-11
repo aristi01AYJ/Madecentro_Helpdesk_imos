@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis casos · Soporte IMOS Madecentro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-nav"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Mis casos</h1>
+      <p>Casos de soporte que creaste, con su estado actual.</p>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <a href="nuevo-caso.html" class="btn btn-primary">+ Nuevo caso</a>
+    </div>
+
+    <div id="alert-box"></div>
+    <div id="lista-casos"></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/simpleAuth.js"></script>
+  <script src="js/powerAutomateService.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    (async function () {
+      const user = requireSimpleAuth();
+      if (!user) return;
+      renderNavPublic(user, "mis-casos");
+
+      const cont = document.getElementById("lista-casos");
+      const alertBox = document.getElementById("alert-box");
+
+      try {
+        const casos = await getMisCasosPA(user.correo);
+        if (casos.length === 0) {
+          cont.innerHTML = `<div class="empty-state">Todavía no creaste ningún caso. <a href="nuevo-caso.html">Crear el primero</a>.</div>`;
+          return;
+        }
+        cont.innerHTML = casos.map(renderCaso).join("");
+      } catch (err) {
+        alertBox.innerHTML = `<div class="alert alert-error">No se pudieron cargar tus casos: ${err.message}</div>`;
+      }
+
+      function renderCaso(c) {
+        const estadoClass = "badge-" + (c.estado || "").replace(/\s+/g, "");
+        return `
+          <div class="caso-item">
+            <div class="caso-item-head">
+              <div>
+                <h3>${c.asunto}</h3>
+                <div class="caso-meta">${c.fechaCreacion ? new Date(c.fechaCreacion).toLocaleDateString("es-CO") + " · " : ""}${c.tipoCaso || ""}</div>
+              </div>
+              <span class="badge-pill ${estadoClass}">${c.estado || ""}</span>
+            </div>
+            <div class="caso-desc">${c.descripcion || ""}</div>
+            <div class="caso-tags">
+              <span class="badge-pill badge-${c.urgencia}">Urgencia: ${c.urgencia}</span>
+              <span class="badge-pill" style="background:#eceff3;color:#444">${c.categoria || ""}</span>
+            </div>
+            ${c.solucion ? `<div class="caso-solucion"><strong>Solución:</strong> ${c.solucion}</div>` : ""}
+          </div>
+        `;
+      }
+    })();
+  </script>
+</body>
+</html>

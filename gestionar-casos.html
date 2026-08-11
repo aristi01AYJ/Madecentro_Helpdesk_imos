@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestionar casos · Soporte IMOS Madecentro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .caso-manage-form {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--mc-border);
+      display: grid;
+      grid-template-columns: 180px 1fr auto;
+      gap: 10px;
+      align-items: start;
+    }
+    .caso-manage-form textarea { min-height: 60px; }
+    @media (max-width: 720px) {
+      .caso-manage-form { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-nav"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Gestionar casos</h1>
+      <p>Actualizá el estado y dejá la solución escrita — al marcar un caso como "Resuelto" o "Cerrado" con solución, queda disponible automáticamente en el Mini Helpdesk.</p>
+    </div>
+
+    <div class="toolbar">
+      <select id="filtro-estado">
+        <option value="">Todos los estados</option>
+      </select>
+      <input type="text" id="filtro-texto" placeholder="Buscar por asunto o usuario..." />
+    </div>
+
+    <div id="alert-box"></div>
+    <div id="lista-casos"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/graphService.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    (async function () {
+      const account = await requireAuth();
+      if (!account) return;
+      renderNav(account, "gestionar-casos");
+
+      const filtroEstado = document.getElementById("filtro-estado");
+      filtroEstado.innerHTML += APP_CONFIG.estados.map((e) => `<option value="${e}">${e}</option>`).join("");
+
+      const filtroTexto = document.getElementById("filtro-texto");
+      const cont = document.getElementById("lista-casos");
+      const alertBox = document.getElementById("alert-box");
+
+      let todos = [];
+
+      async function cargar() {
+        cont.innerHTML = `<div class="empty-state">Cargando casos...</div>`;
+        try {
+          todos = await getTodosCasos();
+          aplicarFiltros();
+        } catch (err) {
+          alertBox.innerHTML = `<div class="alert alert-error">No se pudieron cargar los casos: ${err.message}</div>`;
+          cont.innerHTML = "";
+        }
+      }
+
+      function aplicarFiltros() {
+        const q = filtroTexto.value.trim().toLowerCase();
+        const est = filtroEstado.value;
+        const filtrados = todos.filter((c) => {
+          const matchEstado = !est || c.estado === est;
+          const matchTexto =
+            !q ||
+            (c.asunto || "").toLowerCase().includes(q) ||
+            (c.creadoPorNombre || "").toLowerCase().includes(q) ||
+            (c.creadoPorCorreo || "").toLowerCase().includes(q);
+          return matchEstado && matchTexto;
+        });
+
+        if (filtrados.length === 0) {
+          cont.innerHTML = `<div class="empty-state">No hay casos que coincidan.</div>`;
+          return;
+        }
+        cont.innerHTML = filtrados.map(renderCaso).join("");
+        filtrados.forEach(attachHandlers);
+      }
+
+      function renderCaso(c) {
+        const estadoClass = "badge-" + c.estado.replace(/\s+/g, "");
+        return `
+          <div class="caso-item" data-id="${c.id}">
+            <div class="caso-item-head">
+              <div>
+                <h3>${c.asunto}</h3>
+                <div class="caso-meta">#${c.id} · ${c.creadoPorNombre} (${c.creadoPorCorreo}) · ${new Date(c.fechaCreacion).toLocaleDateString("es-CO")}</div>
+              </div>
+              <span class="badge-pill ${estadoClass}">${c.estado}</span>
+            </div>
+            <div class="caso-desc">${c.descripcion || ""}</div>
+            <div class="caso-tags">
+              <span class="badge-pill badge-${c.urgencia}">Urgencia: ${c.urgencia}</span>
+              <span class="badge-pill" style="background:#eceff3;color:#444">${c.categoria}</span>
+              <span class="badge-pill" style="background:#eceff3;color:#444">${c.tipoCaso}</span>
+            </div>
+
+            <div class="caso-manage-form">
+              <select class="input-estado">
+                ${APP_CONFIG.estados
+                  .map((e) => `<option value="${e}" ${e === c.estado ? "selected" : ""}>${e}</option>`)
+                  .join("")}
+              </select>
+              <textarea class="input-solucion" placeholder="Solución / respuesta dada al usuario...">${c.solucion || ""}</textarea>
+              <button class="btn btn-primary btn-sm btn-guardar">Guardar</button>
+            </div>
+            <div class="guardar-msg" style="font-size:12px;margin-top:6px;"></div>
+          </div>
+        `;
+      }
+
+      function attachHandlers(c) {
+        const el = cont.querySelector(`.caso-item[data-id="${c.id}"]`);
+        if (!el) return;
+        const btn = el.querySelector(".btn-guardar");
+        const msg = el.querySelector(".guardar-msg");
+
+        btn.addEventListener("click", async () => {
+          const nuevoEstado = el.querySelector(".input-estado").value;
+          const nuevaSolucion = el.querySelector(".input-solucion").value;
+
+          btn.disabled = true;
+          btn.textContent = "Guardando...";
+          msg.textContent = "";
+
+          try {
+            await actualizarCaso(c.id, { estado: nuevoEstado, solucion: nuevaSolucion });
+            msg.innerHTML = `<span style="color:var(--mc-success)">Guardado ✓</span>`;
+            c.estado = nuevoEstado;
+            c.solucion = nuevaSolucion;
+            const badge = el.querySelector(".badge-pill");
+            badge.className = "badge-pill badge-" + nuevoEstado.replace(/\s+/g, "");
+            badge.textContent = nuevoEstado;
+          } catch (err) {
+            msg.innerHTML = `<span style="color:var(--mc-danger)">Error: ${err.message}</span>`;
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "Guardar";
+          }
+        });
+      }
+
+      filtroEstado.addEventListener("change", aplicarFiltros);
+      filtroTexto.addEventListener("input", aplicarFiltros);
+      cargar();
+    })();
+  </script>
+</body>
+</html>

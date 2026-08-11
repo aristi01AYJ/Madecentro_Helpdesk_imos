@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini Helpdesk · Soporte IMOS Madecentro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-nav"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Mini Helpdesk</h1>
+      <p>Casos ya resueltos, organizados por categoría. Buscá acá antes de crear un caso nuevo — puede que ya exista la solución.</p>
+    </div>
+
+    <div class="toolbar">
+      <select id="filtro-categoria">
+        <option value="">Todas las categorías</option>
+      </select>
+      <input type="text" id="filtro-texto" placeholder="Buscar por palabra clave..." />
+    </div>
+
+    <div id="alert-box"></div>
+    <div id="lista-resueltos"></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/simpleAuth.js"></script>
+  <script src="js/powerAutomateService.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    (async function () {
+      const user = requireSimpleAuth();
+      if (!user) return;
+      renderNavPublic(user, "helpdesk");
+
+      const selectCategoria = document.getElementById("filtro-categoria");
+      selectCategoria.innerHTML +=
+        APP_CONFIG.categorias.map((c) => `<option value="${c}">${c}</option>`).join("");
+
+      const cont = document.getElementById("lista-resueltos");
+      const alertBox = document.getElementById("alert-box");
+      const filtroTexto = document.getElementById("filtro-texto");
+
+      let todos = [];
+
+      async function cargar() {
+        cont.innerHTML = `<div class="empty-state">Cargando casos resueltos...</div>`;
+        try {
+          todos = await getCasosResueltosPA(selectCategoria.value || undefined);
+          aplicarFiltroTexto();
+        } catch (err) {
+          alertBox.innerHTML = `<div class="alert alert-error">No se pudieron cargar los casos: ${err.message}</div>`;
+          cont.innerHTML = "";
+        }
+      }
+
+      function aplicarFiltroTexto() {
+        const q = filtroTexto.value.trim().toLowerCase();
+        const filtrados = !q
+          ? todos
+          : todos.filter(
+              (c) =>
+                (c.asunto || "").toLowerCase().includes(q) ||
+                (c.descripcion || "").toLowerCase().includes(q) ||
+                (c.solucion || "").toLowerCase().includes(q)
+            );
+
+        if (filtrados.length === 0) {
+          cont.innerHTML = `<div class="empty-state">No hay casos resueltos que coincidan con la búsqueda.</div>`;
+          return;
+        }
+        cont.innerHTML = filtrados.map(renderCaso).join("");
+      }
+
+      function renderCaso(c) {
+        const estadoClass = "badge-" + (c.estado || "").replace(/\s+/g, "");
+        return `
+          <div class="caso-item">
+            <div class="caso-item-head">
+              <div>
+                <h3>${c.asunto}</h3>
+                <div class="caso-meta">${c.categoria || ""} · ${c.tipoCaso || ""}${c.fechaCreacion ? " · resuelto el " + new Date(c.fechaCreacion).toLocaleDateString("es-CO") : ""}</div>
+              </div>
+              <span class="badge-pill ${estadoClass}">${c.estado || ""}</span>
+            </div>
+            <div class="caso-desc">${c.descripcion || ""}</div>
+            ${c.solucion ? `<div class="caso-solucion"><strong>Cómo se resolvió:</strong> ${c.solucion}</div>` : ""}
+          </div>
+        `;
+      }
+
+      selectCategoria.addEventListener("change", cargar);
+      filtroTexto.addEventListener("input", aplicarFiltroTexto);
+      cargar();
+    })();
+  </script>
+</body>
+</html>

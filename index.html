@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soporte IMOS · Madecentro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-card" style="width:440px;">
+      <div class="badge">M</div>
+      <h1>Soporte IMOS</h1>
+      <p>Elegí cómo querés entrar.</p>
+      <div id="alert-box"></div>
+
+      <button id="btn-madecentro" class="btn btn-primary btn-block" style="margin-bottom: 10px;">
+        Soy de Madecentro — crear o consultar un caso
+      </button>
+      <button id="btn-ayj" class="btn btn-secondary btn-block">
+        Soy del equipo de soporte AYJ (login Microsoft)
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/simpleAuth.js"></script>
+  <script>
+    (async function () {
+      // Si ya hay sesión Microsoft activa (equipo AYJ), saltar directo.
+      const account = await initAuth();
+      if (account) {
+        window.location.href = "gestionar-casos.html";
+        return;
+      }
+
+      document.getElementById("btn-madecentro").addEventListener("click", () => {
+        const existing = getSimpleUser();
+        window.location.href = existing ? "nuevo-caso.html" : "login-madecentro.html";
+      });
+
+      document.getElementById("btn-ayj").addEventListener("click", async () => {
+        try {
+          await login();
+        } catch (err) {
+          document.getElementById("alert-box").innerHTML =
+            `<div class="alert alert-error">No se pudo iniciar sesión: ${err.message}</div>`;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

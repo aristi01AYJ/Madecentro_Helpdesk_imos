@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuevo caso · Soporte IMOS Madecentro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app-nav"></div>
+
+  <div class="page">
+    <div class="page-header">
+      <h1>Nuevo caso de soporte</h1>
+      <p>Completá el formulario con el mayor detalle posible. El equipo de soporte IMOS lo va a revisar según la urgencia indicada.</p>
+    </div>
+
+    <div class="card">
+      <div id="alert-box"></div>
+      <form id="form-caso">
+        <div class="form-group">
+          <label for="asunto">Asunto</label>
+          <input type="text" id="asunto" required maxlength="120" placeholder="Ej: No puedo generar la cotización desde IMOS" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipoCaso">Tipo de caso</label>
+            <select id="tipoCaso" required></select>
+          </div>
+          <div class="form-group">
+            <label for="urgencia">Urgencia</label>
+            <select id="urgencia" required></select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="categoria">Categoría</label>
+          <select id="categoria" required></select>
+          <div class="help-text">Sirve para que el caso quede clasificado en el Mini Helpdesk cuando se resuelva.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción del problema o solicitud</label>
+          <textarea id="descripcion" required placeholder="Contá qué pasó, en qué módulo de IMOS, y los pasos para reproducirlo si aplica."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Documentos adjuntos</label>
+          <div class="dropzone">Próximamente: por ahora describí el problema en detalle en el campo de arriba. Vamos a habilitar adjuntos en una segunda vuelta.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="btn-submit">Crear caso</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/simpleAuth.js"></script>
+  <script src="js/powerAutomateService.js"></script>
+  <script src="js/nav.js"></script>
+  <script>
+    (function () {
+      const user = requireSimpleAuth();
+      if (!user) return;
+      renderNavPublic(user, "nuevo-caso");
+
+      const fill = (id, options) => {
+        const el = document.getElementById(id);
+        el.innerHTML = options.map((o) => `<option value="${o}">${o}</option>`).join("");
+      };
+      fill("tipoCaso", APP_CONFIG.tiposDeCaso);
+      fill("urgencia", APP_CONFIG.urgencias);
+      fill("categoria", APP_CONFIG.categorias);
+
+      const alertBox = document.getElementById("alert-box");
+      const btnSubmit = document.getElementById("btn-submit");
+
+      document.getElementById("form-caso").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        alertBox.innerHTML = "";
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = "Creando caso...";
+
+        try {
+          const nuevoCaso = await crearCasoPA({
+            asunto: document.getElementById("asunto").value,
+            descripcion: document.getElementById("descripcion").value,
+            tipoCaso: document.getElementById("tipoCaso").value,
+            urgencia: document.getElementById("urgencia").value,
+            categoria: document.getElementById("categoria").value,
+            creadoPorNombre: user.nombre,
+            creadoPorCorreo: user.correo,
+          });
+
+          alertBox.innerHTML = `<div class="alert alert-success">Caso creado correctamente. Redirigiendo a "Mis casos"...</div>`;
+          setTimeout(() => (window.location.href = "mis-casos.html"), 1200);
+        } catch (err) {
+          alertBox.innerHTML = `<div class="alert alert-error">No se pudo crear el caso: ${err.message}</div>`;
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = "Crear caso";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
