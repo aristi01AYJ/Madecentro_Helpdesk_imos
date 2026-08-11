@@ -35,7 +35,7 @@ const APP_CONFIG = {
   // nuevo-caso.html, mis-casos.html, helpdesk.html.
   // Pegá acá la URL "HTTP POST URL" que te da cada flujo al guardarlo.
   powerAutomate: {
-    crearCasoUrl: "https://defaultc03f8e4026004b72bd823d604e8a9a.ac.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/18/workflows/36f266747c6044bb8289c03eb2702207/triggers/manual/paths/invoke?api-version=1",
+    crearCasoUrl: "https://defaultc03f8e4026004b72bd823d604e8a9a.ac.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/18/workflows/36f266747c6044bb8289c03eb2702207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BB78BEJKqv4ZUz2sSl3kTcYBqRWT210wlMnH5Z_f0eM",
     misCasosUrl: "PEGAR_URL_DEL_FLUJO_MIS_CASOS",
     casosResueltosUrl: "PEGAR_URL_DEL_FLUJO_CASOS_RESUELTOS",
   },
