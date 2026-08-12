@@ -10,8 +10,8 @@
 const APP_CONFIG = {
   // --- Azure AD / Entra ID (App Registration) ---
   auth: {
-    clientId: "TU_CLIENT_ID_AQUI",          // Application (client) ID de la app registrada
-    tenantId: "TU_TENANT_ID_AQUI",          // Directory (tenant) ID de Madecentro
+    clientId: "25696701-ec12-4c2a-b51f-7efd7f27cc7a",          // Application (client) ID de la app registrada
+    tenantId: "c03f8e40-2600-4b72-bd82-3d604e8a9aac",          // Directory (tenant) ID de Madecentro
     redirectUri: window.location.origin + window.location.pathname.replace(/[^/]+$/, "") + "index.html",
     postLogoutRedirectUri: window.location.origin,
   },
@@ -23,9 +23,9 @@ const APP_CONFIG = {
   // Usado SOLO por gestionar-casos.html (login Microsoft, equipo AYJ).
   sharepoint: {
     // ID del sitio de SharePoint donde vive la lista. Ej: "contoso.sharepoint.com,GUID,GUID"
-    siteId: "TU_SITE_ID_AQUI",
+    siteId: "ayjcsp.sharepoint.com,c7a4dc17-944b-4ffb-8a45-6b58a6380e7a,bbba19ba-2b3e-4b11-bc3f-ce54e0dec277",
     // ID (o nombre) de la lista "CasosSoporteIMOS"
-    listId: "TU_LIST_ID_AQUI",
+    listId: "126c7de4-9596-453b-ad8c-572d16c1be45",
     // Nombre de la biblioteca de documentos donde se guardan los adjuntos de los casos
     attachmentsLibrary: "AdjuntosCasos",
   },
