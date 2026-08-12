@@ -63,15 +63,25 @@ async function getCasosResueltosPA(categoria) {
  * el flujo al devolverlo (por si el flujo devuelve los nombres internos
  * de SharePoint tal cual, en vez de los "amigables").
  */
+/**
+ * Los campos de selección (Choice) de SharePoint a veces vienen como
+ * texto simple ("Abierto") y a veces como objeto { Value: "Abierto" }
+ * según el conector que los devuelva. Esto normaliza cualquiera de las dos formas.
+ */
+function extraerValor(v) {
+  if (v && typeof v === "object" && "Value" in v) return v.Value;
+  return v;
+}
+
 function mapCasoPA(c) {
   return {
     id: c.id || c.ID || c.Id,
     asunto: c.asunto || c.Title,
     descripcion: c.descripcion || c.Descripcion,
-    tipoCaso: c.tipoCaso || c.TipoCaso,
-    urgencia: c.urgencia || c.Urgencia,
-    categoria: c.categoria || c.Categoria,
-    estado: c.estado || c.Estado,
+    tipoCaso: extraerValor(c.tipoCaso || c.TipoCaso),
+    urgencia: extraerValor(c.urgencia || c.Urgencia),
+    categoria: extraerValor(c.categoria || c.Categoria),
+    estado: extraerValor(c.estado || c.Estado),
     solucion: c.solucion || c.Solucion,
     creadoPorNombre: c.creadoPorNombre || c.CreadoPorNombre,
     creadoPorCorreo: c.creadoPorCorreo || c.CreadoPorCorreo,
