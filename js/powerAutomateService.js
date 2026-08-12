@@ -47,13 +47,12 @@ async function getMisCasosPA(correo) {
 }
 
 /**
- * Trae los casos resueltos (para el Helpdesk) a través del flujo
- * "IMOS - Casos Resueltos", opcionalmente filtrados por categoría.
+ * Trae TODOS los casos resueltos/cerrados (para el Helpdesk) a través del
+ * flujo "IMOS - Casos Resueltos". El filtro por categoría se hace en el
+ * navegador (ver helpdesk.html), no acá — así el flujo queda simple.
  */
-async function getCasosResueltosPA(categoria) {
-  const data = await paFetch(APP_CONFIG.powerAutomate.casosResueltosUrl, {
-    categoria: categoria || "",
-  });
+async function getCasosResueltosPA() {
+  const data = await paFetch(APP_CONFIG.powerAutomate.casosResueltosUrl, {});
   const items = data.casos || data.value || [];
   return items.map(mapCasoPA);
 }

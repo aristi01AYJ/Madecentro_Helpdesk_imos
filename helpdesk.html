@@ -49,24 +49,26 @@
       async function cargar() {
         cont.innerHTML = `<div class="empty-state">Cargando casos resueltos...</div>`;
         try {
-          todos = await getCasosResueltosPA(selectCategoria.value || undefined);
-          aplicarFiltroTexto();
+          todos = await getCasosResueltosPA();
+          aplicarFiltros();
         } catch (err) {
           alertBox.innerHTML = `<div class="alert alert-error">No se pudieron cargar los casos: ${err.message}</div>`;
           cont.innerHTML = "";
         }
       }
 
-      function aplicarFiltroTexto() {
+      function aplicarFiltros() {
         const q = filtroTexto.value.trim().toLowerCase();
-        const filtrados = !q
-          ? todos
-          : todos.filter(
-              (c) =>
-                (c.asunto || "").toLowerCase().includes(q) ||
-                (c.descripcion || "").toLowerCase().includes(q) ||
-                (c.solucion || "").toLowerCase().includes(q)
-            );
+        const cat = selectCategoria.value;
+        const filtrados = todos.filter((c) => {
+          const matchCategoria = !cat || c.categoria === cat;
+          const matchTexto =
+            !q ||
+            (c.asunto || "").toLowerCase().includes(q) ||
+            (c.descripcion || "").toLowerCase().includes(q) ||
+            (c.solucion || "").toLowerCase().includes(q);
+          return matchCategoria && matchTexto;
+        });
 
         if (filtrados.length === 0) {
           cont.innerHTML = `<div class="empty-state">No hay casos resueltos que coincidan con la búsqueda.</div>`;
@@ -92,8 +94,8 @@
         `;
       }
 
-      selectCategoria.addEventListener("change", cargar);
-      filtroTexto.addEventListener("input", aplicarFiltroTexto);
+      selectCategoria.addEventListener("change", aplicarFiltros);
+      filtroTexto.addEventListener("input", aplicarFiltros);
       cargar();
     })();
   </script>
