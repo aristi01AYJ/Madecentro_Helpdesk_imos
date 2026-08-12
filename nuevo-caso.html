@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nuevo caso · Soporte IMOS Madecentro</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260812d" />
+  <link rel="stylesheet" href="css/styles.css?v=20260812e" />
 </head>
 <body>
   <div id="app-nav"></div>
@@ -46,8 +46,9 @@
         </div>
 
         <div class="form-group">
-          <label>Documentos adjuntos</label>
-          <div class="dropzone">Próximamente: por ahora describí el problema en detalle en el campo de arriba. Vamos a habilitar adjuntos en una segunda vuelta.</div>
+          <label for="adjunto">Documento adjunto (opcional)</label>
+          <input type="file" id="adjunto" />
+          <div class="help-text">Máximo 4 MB (capturas de pantalla, planos, PDFs).</div>
         </div>
 
         <button type="submit" class="btn btn-primary" id="btn-submit">Crear caso</button>
@@ -55,15 +56,25 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=20260812d"></script>
-  <script src="js/simpleAuth.js?v=20260812d"></script>
-  <script src="js/powerAutomateService.js?v=20260812d"></script>
-  <script src="js/nav.js?v=20260812d"></script>
+  <script src="js/config.js?v=20260812e"></script>
+  <script src="js/simpleAuth.js?v=20260812e"></script>
+  <script src="js/powerAutomateService.js?v=20260812e"></script>
+  <script src="js/nav.js?v=20260812e"></script>
   <script>
     (function () {
       const user = requireSimpleAuth();
       if (!user) return;
       renderNavPublic(user, "nuevo-caso");
+
+      // Lee un archivo y devuelve solo la parte base64 (sin el prefijo "data:...;base64,")
+      function archivoABase64(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(",")[1] || "");
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
 
       const fill = (id, options) => {
         const el = document.getElementById(id);
@@ -83,6 +94,21 @@
         btnSubmit.textContent = "Creando caso...";
 
         try {
+          const archivo = document.getElementById("adjunto").files[0];
+          let adjuntoNombre = "";
+          let adjuntoBase64 = "";
+
+          if (archivo) {
+            const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
+            if (archivo.size > MAX_BYTES) {
+              throw new Error("El archivo adjunto supera los 4 MB. Eleg\u00ed uno m\u00e1s liviano.");
+            }
+            btnSubmit.textContent = "Preparando adjunto...";
+            adjuntoNombre = archivo.name;
+            adjuntoBase64 = await archivoABase64(archivo);
+          }
+
+          btnSubmit.textContent = "Creando caso...";
           const nuevoCaso = await crearCasoPA({
             asunto: document.getElementById("asunto").value,
             descripcion: document.getElementById("descripcion").value,
@@ -91,6 +117,8 @@
             categoria: document.getElementById("categoria").value,
             creadoPorNombre: user.nombre,
             creadoPorCorreo: user.correo,
+            adjuntoNombre,
+            adjuntoBase64,
           });
 
           alertBox.innerHTML = `<div class="alert alert-success">Caso creado correctamente. Redirigiendo a "Mis casos"...</div>`;

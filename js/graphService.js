@@ -160,7 +160,7 @@ function ordenarPorFechaDesc(a, b) {
  * Se hace con PATCH sobre /fields, igual que el patrón usado en los
  * cotizadores AYJ para campos adicionales tras la creación del item.
  */
-async function actualizarCaso(casoId, { estado, solucion, tiempoUsadoHoras, synergyId, fechaCierre }) {
+async function actualizarCaso(casoId, { estado, solucion, tiempoUsadoHoras, synergyId, fechaCierre, adjuntosSolucionUrls }) {
   const { siteId, listId } = APP_CONFIG.sharepoint;
   const fields = {};
   if (estado !== undefined) fields.Estado = estado;
@@ -168,11 +168,21 @@ async function actualizarCaso(casoId, { estado, solucion, tiempoUsadoHoras, syne
   if (tiempoUsadoHoras !== undefined && tiempoUsadoHoras !== "") fields.TiempoUsadoHoras = Number(tiempoUsadoHoras);
   if (synergyId !== undefined) fields.SynergyId = synergyId;
   if (fechaCierre !== undefined) fields.FechaCierre = fechaCierre;
+  if (adjuntosSolucionUrls !== undefined) fields.AdjuntosSolucionUrls = adjuntosSolucionUrls;
 
   return graphFetch(`/sites/${siteId}/lists/${listId}/items/${casoId}/fields`, {
     method: "PATCH",
     body: JSON.stringify(fields),
   });
+}
+
+/**
+ * Sube UN archivo (adjunto de la solución) directo a la biblioteca de
+ * adjuntos vía Graph, y devuelve su URL. Usado desde gestionar-casos.html,
+ * que ya tiene sesión de Microsoft — no necesita pasar por Power Automate.
+ */
+async function subirAdjuntoSolucion(casoId, file) {
+  return subirAdjunto(casoId, file);
 }
 
 function mapListItem(item) {
@@ -189,6 +199,7 @@ function mapListItem(item) {
     creadoPorNombre: f.CreadoPorNombre,
     creadoPorCorreo: f.CreadoPorCorreo,
     adjuntos: (f.AdjuntosUrls || "").split("\n").filter(Boolean),
+    adjuntosSolucion: (f.AdjuntosSolucionUrls || "").split("\n").filter(Boolean),
     fechaCreacion: f.Created,
     fechaApertura: f.FechaApertura,
     fechaCierre: f.FechaCierre,

@@ -89,5 +89,7 @@ function mapCasoPA(c) {
     fechaCierre: c.fechaCierre || c.FechaCierre,
     tiempoUsadoHoras: c.tiempoUsadoHoras || c.TiempoUsadoHoras,
     synergyId: c.synergyId || c.SynergyId,
+    adjuntos: (c.adjuntos || c.AdjuntosUrls || "").split("\n").filter(Boolean),
+    adjuntosSolucion: (c.adjuntosSolucion || c.AdjuntosSolucionUrls || "").split("\n").filter(Boolean),
   };
 }

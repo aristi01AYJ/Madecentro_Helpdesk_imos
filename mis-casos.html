@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mis casos · Soporte IMOS Madecentro</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260812d" />
+  <link rel="stylesheet" href="css/styles.css?v=20260812e" />
 </head>
 <body>
   <div id="app-nav"></div>
@@ -23,10 +23,10 @@
     <div id="lista-casos"></div>
   </div>
 
-  <script src="js/config.js?v=20260812d"></script>
-  <script src="js/simpleAuth.js?v=20260812d"></script>
-  <script src="js/powerAutomateService.js?v=20260812d"></script>
-  <script src="js/nav.js?v=20260812d"></script>
+  <script src="js/config.js?v=20260812e"></script>
+  <script src="js/simpleAuth.js?v=20260812e"></script>
+  <script src="js/powerAutomateService.js?v=20260812e"></script>
+  <script src="js/nav.js?v=20260812e"></script>
   <script>
     (async function () {
       const user = requireSimpleAuth();
@@ -64,6 +64,8 @@
               <span class="badge-pill" style="background:#eceff3;color:#444">${c.categoria || ""}</span>
             </div>
             ${c.solucion ? `<div class="caso-solucion"><strong>Solución:</strong> ${c.solucion}</div>` : ""}
+            ${c.adjuntos && c.adjuntos.length > 0 ? `<div style="margin-top:8px;font-size:13px;">📎 Adjunto: ${c.adjuntos.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">Ver archivo</a>`).join(", ")}</div>` : ""}
+            ${c.adjuntosSolucion && c.adjuntosSolucion.length > 0 ? `<div style="margin-top:4px;font-size:13px;">📎 Adjunto de la solución: ${c.adjuntosSolucion.map((u, i) => `<a href="${u}" target="_blank" rel="noopener">Ver archivo</a>`).join(", ")}</div>` : ""}
           </div>
         `;
       }
