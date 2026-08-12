@@ -37,7 +37,7 @@ const APP_CONFIG = {
   powerAutomate: {
     crearCasoUrl: "https://defaultc03f8e4026004b72bd823d604e8a9a.ac.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/18/workflows/36f266747c6044bb8289c03eb2702207/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=BB78BEJKqv4ZUz2sSl3kTcYBqRWT210wlMnH5Z_f0eM",
     misCasosUrl: "https://defaultc03f8e4026004b72bd823d604e8a9a.ac.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/13/workflows/863e00d32d28466198405d7e03398a21/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=IHg6f3WT-5zTwi-PJlV1-UG8QLiRxHF7td4c5uxRk4A",
-    casosResueltosUrl: "PEGAR_URL_DEL_FLUJO_CASOS_RESUELTOS",
+    casosResueltosUrl: "https://defaultc03f8e4026004b72bd823d604e8a9a.ac.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/06/workflows/08958f10db2c4f26ba2bca0b25c3aae0/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DviA7NcCKBKTIFr7EQdLDMplCbi9SZ8SWzDikaSKdDs",
   },
 
   // --- Datos de negocio (editable sin tocar el resto del código) ---
