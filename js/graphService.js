@@ -110,9 +110,9 @@ async function getMisCasos(correo) {
   const { siteId, listId } = APP_CONFIG.sharepoint;
   const filter = encodeURIComponent(`fields/CreadoPorCorreo eq '${correo}'`);
   const data = await graphFetch(
-    `/sites/${siteId}/lists/${listId}/items?expand=fields&$filter=${filter}&$orderby=fields/Created desc`
+    `/sites/${siteId}/lists/${listId}/items?expand=fields&$filter=${filter}`
   );
-  return (data.value || []).map(mapListItem);
+  return (data.value || []).map(mapListItem).sort(ordenarPorFechaDesc);
 }
 
 /**
@@ -128,9 +128,9 @@ async function getCasosResueltos(categoria) {
   const data = await graphFetch(
     `/sites/${siteId}/lists/${listId}/items?expand=fields&$filter=${encodeURIComponent(
       filter
-    )}&$orderby=fields/Created desc`
+    )}`
   );
-  return (data.value || []).map(mapListItem);
+  return (data.value || []).map(mapListItem).sort(ordenarPorFechaDesc);
 }
 
 /**
@@ -142,9 +142,17 @@ async function getCasosResueltos(categoria) {
 async function getTodosCasos() {
   const { siteId, listId } = APP_CONFIG.sharepoint;
   const data = await graphFetch(
-    `/sites/${siteId}/lists/${listId}/items?expand=fields&$top=500&$orderby=fields/Created desc`
+    `/sites/${siteId}/lists/${listId}/items?expand=fields&$top=500`
   );
-  return (data.value || []).map(mapListItem);
+  return (data.value || []).map(mapListItem).sort(ordenarPorFechaDesc);
+}
+
+/**
+ * "Created" no está indexada en la lista, así que SharePoint no permite
+ * usarla en $orderby (Graph tira error 400). Se ordena acá en el navegador.
+ */
+function ordenarPorFechaDesc(a, b) {
+  return new Date(b.fechaCreacion || 0) - new Date(a.fechaCreacion || 0);
 }
 
 /**
