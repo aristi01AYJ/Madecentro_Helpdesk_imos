@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nuevo caso · Soporte IMOS</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260814a" />
+  <link rel="stylesheet" href="css/styles.css?v=20260814b" />
 </head>
 <body>
   <div id="app-nav"></div>
@@ -46,9 +46,9 @@
         </div>
 
         <div class="form-group">
-          <label for="adjunto">Documento adjunto (opcional)</label>
-          <input type="file" id="adjunto" />
-          <div class="help-text">Máximo 4 MB (capturas de pantalla, planos, PDFs).</div>
+          <label for="adjunto">Documentos adjuntos (opcional)</label>
+          <input type="file" id="adjunto" multiple />
+          <div class="help-text">Máximo 4 MB por archivo, hasta 5 archivos (capturas de pantalla, planos, PDFs).</div>
         </div>
 
         <button type="submit" class="btn btn-primary" id="btn-submit">Crear caso</button>
@@ -56,10 +56,10 @@
     </div>
   </div>
 
-  <script src="js/config.js?v=20260814a"></script>
-  <script src="js/simpleAuth.js?v=20260814a"></script>
-  <script src="js/powerAutomateService.js?v=20260814a"></script>
-  <script src="js/nav.js?v=20260814a"></script>
+  <script src="js/config.js?v=20260814b"></script>
+  <script src="js/simpleAuth.js?v=20260814b"></script>
+  <script src="js/powerAutomateService.js?v=20260814b"></script>
+  <script src="js/nav.js?v=20260814b"></script>
   <script>
     (function () {
       const user = requireSimpleAuth();
@@ -75,6 +75,9 @@
           reader.readAsDataURL(file);
         });
       }
+
+      const MAX_ADJUNTOS = 5;
+      const MAX_BYTES_POR_ARCHIVO = 4 * 1024 * 1024; // 4 MB
 
       const fill = (id, options) => {
         const el = document.getElementById(id);
@@ -94,18 +97,25 @@
         btnSubmit.textContent = "Creando caso...";
 
         try {
-          const archivo = document.getElementById("adjunto").files[0];
-          let adjuntoNombre = "";
-          let adjuntoBase64 = "";
-
-          if (archivo) {
-            const MAX_BYTES = 4 * 1024 * 1024; // 4 MB
-            if (archivo.size > MAX_BYTES) {
-              throw new Error("El archivo adjunto supera los 4 MB. Eleg\u00ed uno m\u00e1s liviano.");
+          const archivos = Array.from(document.getElementById("adjunto").files || []);
+          if (archivos.length > MAX_ADJUNTOS) {
+            throw new Error(`Eleg\u00ed como m\u00e1ximo ${MAX_ADJUNTOS} archivos.`);
+          }
+          for (const f of archivos) {
+            if (f.size > MAX_BYTES_POR_ARCHIVO) {
+              throw new Error(`El archivo "${f.name}" supera los 4 MB. Eleg\u00ed uno m\u00e1s liviano.`);
             }
-            btnSubmit.textContent = "Preparando adjunto...";
-            adjuntoNombre = archivo.name;
-            adjuntoBase64 = await archivoABase64(archivo);
+          }
+
+          let adjuntos = [];
+          if (archivos.length > 0) {
+            btnSubmit.textContent = "Preparando adjuntos...";
+            adjuntos = await Promise.all(
+              archivos.map(async (f) => ({
+                nombre: f.name,
+                base64: await archivoABase64(f),
+              }))
+            );
           }
 
           btnSubmit.textContent = "Creando caso...";
@@ -118,8 +128,7 @@
             creadoPorNombre: user.nombre,
             creadoPorCorreo: user.correo,
             cliente: user.cliente,
-            adjuntoNombre,
-            adjuntoBase64,
+            adjuntos,
           });
 
           alertBox.innerHTML = `<div class="alert alert-success">Caso creado correctamente. Redirigiendo a "Mis casos"...</div>`;

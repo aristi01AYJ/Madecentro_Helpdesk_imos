@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Gestionar casos · Soporte IMOS</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260814a" />
+  <link rel="stylesheet" href="css/styles.css?v=20260814b" />
   <style>
     .caso-manage-form {
       margin-top: 12px;
@@ -45,10 +45,10 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
-  <script src="js/config.js?v=20260814a"></script>
-  <script src="js/auth.js?v=20260814a"></script>
-  <script src="js/graphService.js?v=20260814a"></script>
-  <script src="js/nav.js?v=20260814a"></script>
+  <script src="js/config.js?v=20260814b"></script>
+  <script src="js/auth.js?v=20260814b"></script>
+  <script src="js/graphService.js?v=20260814b"></script>
+  <script src="js/nav.js?v=20260814b"></script>
   <script>
     (async function () {
       const account = await requireAuth();
@@ -133,7 +133,7 @@
               <input type="number" step="0.5" min="0" class="input-tiempo" placeholder="Horas usadas" value="${c.tiempoUsadoHoras || ""}" />
               <input type="text" class="input-synergy" placeholder="ID Synergy (opcional)" value="${c.synergyId || ""}" />
 
-              <input type="file" class="input-adjunto-solucion" style="grid-column: 1 / -1;" />
+              <input type="file" class="input-adjunto-solucion" multiple style="grid-column: 1 / -1;" />
             </div>
             <div class="guardar-msg" style="font-size:12px;margin-top:6px;"></div>
           </div>
@@ -151,7 +151,7 @@
           const nuevaSolucion = el.querySelector(".input-solucion").value;
           const nuevoTiempo = el.querySelector(".input-tiempo").value;
           const nuevoSynergy = el.querySelector(".input-synergy").value;
-          const archivoSolucion = el.querySelector(".input-adjunto-solucion").files[0];
+          const archivosSolucion = Array.from(el.querySelector(".input-adjunto-solucion").files || []);
 
           const esCierre = nuevoEstado === "Resuelto" || nuevoEstado === "Cerrado";
           const fechaCierre = esCierre && !c.fechaCierre ? new Date().toISOString() : undefined;
@@ -162,11 +162,15 @@
 
           try {
             let adjuntosSolucionUrls;
-            if (archivoSolucion) {
-              btn.textContent = "Subiendo adjunto...";
-              const url = await subirAdjuntoSolucion(c.id, archivoSolucion);
+            if (archivosSolucion.length > 0) {
+              const nuevasUrls = [];
+              for (let i = 0; i < archivosSolucion.length; i++) {
+                btn.textContent = `Subiendo adjunto ${i + 1}/${archivosSolucion.length}...`;
+                const url = await subirAdjuntoSolucion(c.id, archivosSolucion[i]);
+                nuevasUrls.push(url);
+              }
               const existentes = c.adjuntosSolucion || [];
-              adjuntosSolucionUrls = [...existentes, url].join("\n");
+              adjuntosSolucionUrls = [...existentes, ...nuevasUrls].join("\n");
             }
 
             btn.textContent = "Guardando...";
