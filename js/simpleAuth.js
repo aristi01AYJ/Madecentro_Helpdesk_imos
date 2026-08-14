@@ -22,13 +22,13 @@ function getSimpleUser() {
   }
 }
 
-function setSimpleUser(nombre, correo) {
-  sessionStorage.setItem(SIMPLE_AUTH_KEY, JSON.stringify({ nombre, correo }));
+function setSimpleUser(nombre, correo, cliente) {
+  sessionStorage.setItem(SIMPLE_AUTH_KEY, JSON.stringify({ nombre, correo, cliente }));
 }
 
 function simpleLogout() {
   sessionStorage.removeItem(SIMPLE_AUTH_KEY);
-  window.location.href = "login-madecentro.html";
+  window.location.href = "login.html";
 }
 
 /**
@@ -39,7 +39,7 @@ function simpleLogout() {
 function requireSimpleAuth() {
   const user = getSimpleUser();
   if (!user) {
-    window.location.href = "login-madecentro.html";
+    window.location.href = "login.html";
     return null;
   }
   return user;

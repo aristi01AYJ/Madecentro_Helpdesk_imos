@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gestionar casos · Soporte IMOS Madecentro</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260812e" />
+  <title>Gestionar casos · Soporte IMOS</title>
+  <link rel="stylesheet" href="css/styles.css?v=20260814a" />
   <style>
     .caso-manage-form {
       margin-top: 12px;
@@ -31,6 +31,9 @@
     </div>
 
     <div class="toolbar">
+      <select id="filtro-cliente">
+        <option value="">Todas las empresas</option>
+      </select>
       <select id="filtro-estado">
         <option value="">Todos los estados</option>
       </select>
@@ -42,15 +45,18 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
-  <script src="js/config.js?v=20260812e"></script>
-  <script src="js/auth.js?v=20260812e"></script>
-  <script src="js/graphService.js?v=20260812e"></script>
-  <script src="js/nav.js?v=20260812e"></script>
+  <script src="js/config.js?v=20260814a"></script>
+  <script src="js/auth.js?v=20260814a"></script>
+  <script src="js/graphService.js?v=20260814a"></script>
+  <script src="js/nav.js?v=20260814a"></script>
   <script>
     (async function () {
       const account = await requireAuth();
       if (!account) return;
       renderNav(account, "gestionar-casos");
+
+      const filtroCliente = document.getElementById("filtro-cliente");
+      filtroCliente.innerHTML += APP_CONFIG.clientes.map((cl) => `<option value="${cl}">${cl}</option>`).join("");
 
       const filtroEstado = document.getElementById("filtro-estado");
       filtroEstado.innerHTML += APP_CONFIG.estados.map((e) => `<option value="${e}">${e}</option>`).join("");
@@ -75,14 +81,16 @@
       function aplicarFiltros() {
         const q = filtroTexto.value.trim().toLowerCase();
         const est = filtroEstado.value;
+        const cli = filtroCliente.value;
         const filtrados = todos.filter((c) => {
           const matchEstado = !est || c.estado === est;
+          const matchCliente = !cli || c.cliente === cli;
           const matchTexto =
             !q ||
             (c.asunto || "").toLowerCase().includes(q) ||
             (c.creadoPorNombre || "").toLowerCase().includes(q) ||
             (c.creadoPorCorreo || "").toLowerCase().includes(q);
-          return matchEstado && matchTexto;
+          return matchEstado && matchCliente && matchTexto;
         });
 
         if (filtrados.length === 0) {
@@ -100,7 +108,7 @@
             <div class="caso-item-head">
               <div>
                 <h3>${c.asunto}</h3>
-                <div class="caso-meta">#${c.id} · ${c.creadoPorNombre} (${c.creadoPorCorreo}) · Abierto: ${new Date(c.fechaApertura || c.fechaCreacion).toLocaleDateString("es-CO")}${c.fechaCierre ? " · Cerrado: " + new Date(c.fechaCierre).toLocaleDateString("es-CO") : ""}${c.tiempoUsadoHoras ? " · " + c.tiempoUsadoHoras + "h usadas" : ""}${c.synergyId ? " · Synergy: " + c.synergyId : ""}</div>
+                <div class="caso-meta">${c.cliente ? "<strong>" + c.cliente + "</strong> · " : ""}#${c.id} · ${c.creadoPorNombre} (${c.creadoPorCorreo}) · Abierto: ${new Date(c.fechaApertura || c.fechaCreacion).toLocaleDateString("es-CO")}${c.fechaCierre ? " · Cerrado: " + new Date(c.fechaCierre).toLocaleDateString("es-CO") : ""}${c.tiempoUsadoHoras ? " · " + c.tiempoUsadoHoras + "h usadas" : ""}${c.synergyId ? " · Synergy: " + c.synergyId : ""}</div>
               </div>
               <span class="badge-pill ${estadoClass}">${c.estado}</span>
             </div>
@@ -191,6 +199,7 @@
         });
       }
 
+      filtroCliente.addEventListener("change", aplicarFiltros);
       filtroEstado.addEventListener("change", aplicarFiltros);
       filtroTexto.addEventListener("input", aplicarFiltros);
       cargar();

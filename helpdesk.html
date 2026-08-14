@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mini Helpdesk · Soporte IMOS Madecentro</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260812e" />
+  <title>Mini Helpdesk · Soporte IMOS</title>
+  <link rel="stylesheet" href="css/styles.css?v=20260814a" />
 </head>
 <body>
   <div id="app-nav"></div>
@@ -26,10 +26,10 @@
     <div id="lista-resueltos"></div>
   </div>
 
-  <script src="js/config.js?v=20260812e"></script>
-  <script src="js/simpleAuth.js?v=20260812e"></script>
-  <script src="js/powerAutomateService.js?v=20260812e"></script>
-  <script src="js/nav.js?v=20260812e"></script>
+  <script src="js/config.js?v=20260814a"></script>
+  <script src="js/simpleAuth.js?v=20260814a"></script>
+  <script src="js/powerAutomateService.js?v=20260814a"></script>
+  <script src="js/nav.js?v=20260814a"></script>
   <script>
     (async function () {
       const user = requireSimpleAuth();
@@ -49,7 +49,7 @@
       async function cargar() {
         cont.innerHTML = `<div class="empty-state">Cargando casos resueltos...</div>`;
         try {
-          todos = await getCasosResueltosPA();
+          todos = await getCasosResueltosPA(user.cliente);
           aplicarFiltros();
         } catch (err) {
           alertBox.innerHTML = `<div class="alert alert-error">No se pudieron cargar los casos: ${err.message}</div>`;

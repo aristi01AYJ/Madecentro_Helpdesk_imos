@@ -52,6 +52,9 @@ const APP_CONFIG = {
 
   urgencias: ["Baja", "Media", "Alta", "Crítica"],
 
+  // Empresas/clientes que usan este portal de soporte IMOS.
+  clientes: ["Madecentro", "Challenger", "Socoda", "Otro"],
+
   categorias: [
     "CAD",
     "XML",

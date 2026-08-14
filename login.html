@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soporte IMOS · AYJ</title>
+  <link rel="stylesheet" href="css/styles.css?v=20260814a" />
+</head>
+<body>
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="badge">S</div>
+      <h1>Soporte IMOS</h1>
+      <p>Ingresá tu nombre, correo y empresa para crear o consultar casos. No hace falta contraseña.</p>
+      <div id="alert-box"></div>
+      <form id="form-login">
+        <div class="form-group" style="text-align:left;">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" required placeholder="Ej: María Gómez" />
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label for="correo">Correo</label>
+          <input type="email" id="correo" required placeholder="tu.correo@empresa.com" />
+        </div>
+        <div class="form-group" style="text-align:left;">
+          <label for="cliente">Empresa</label>
+          <select id="cliente" required></select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Continuar</button>
+      </form>
+      <p style="margin-top:16px;"><a href="index.html">&larr; Volver</a></p>
+    </div>
+  </div>
+
+  <script src="js/config.js?v=20260814a"></script>
+  <script src="js/simpleAuth.js?v=20260814a"></script>
+  <script>
+    (function () {
+      const selectCliente = document.getElementById("cliente");
+      selectCliente.innerHTML = APP_CONFIG.clientes
+        .map((c) => `<option value="${c}">${c}</option>`)
+        .join("");
+
+      document.getElementById("form-login").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const nombre = document.getElementById("nombre").value.trim();
+        const correo = document.getElementById("correo").value.trim();
+        const cliente = selectCliente.value;
+        if (!nombre || !correo || !cliente) return;
+        setSimpleUser(nombre, correo, cliente);
+        window.location.href = "nuevo-caso.html";
+      });
+
+      // Si ya había una sesión simple activa, saltar directo.
+      const existing = getSimpleUser();
+      if (existing) window.location.href = "nuevo-caso.html";
+    })();
+  </script>
+</body>
+</html>

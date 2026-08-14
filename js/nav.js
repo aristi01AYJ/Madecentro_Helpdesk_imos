@@ -1,7 +1,7 @@
 /**
  * nav.js
  * Dos barras de navegación separadas:
- *  - renderNavPublic: páginas de Madecentro (login simple nombre+correo)
+ *  - renderNavPublic: páginas de clientes (login simple nombre+correo+empresa)
  *  - renderNav: página interna de AYJ (login Microsoft)
  * Ambas insertan en <div id="app-nav"></div>.
  */
@@ -19,8 +19,8 @@ function renderNavPublic(user, activePage) {
   nav.innerHTML = `
     <div class="nav-inner">
       <a href="nuevo-caso.html" class="nav-brand">
-        <span class="nav-brand-badge">M</span>
-        Soporte IMOS · Madecentro
+        <span class="nav-brand-badge">S</span>
+        Soporte IMOS${user && user.cliente ? " · " + user.cliente : ""}
       </a>
       <div class="nav-links">
         ${links

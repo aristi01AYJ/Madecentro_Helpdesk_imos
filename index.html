@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Soporte IMOS · Madecentro</title>
-  <link rel="stylesheet" href="css/styles.css?v=20260812e" />
+  <title>Soporte IMOS · AYJ</title>
+  <link rel="stylesheet" href="css/styles.css?v=20260814a" />
 </head>
 <body>
   <div class="login-screen">
     <div class="login-card" style="width:440px;">
-      <div class="badge">M</div>
+      <div class="badge">S</div>
       <h1>Soporte IMOS</h1>
       <p>Elegí cómo querés entrar.</p>
       <div id="alert-box"></div>
 
-      <button id="btn-madecentro" class="btn btn-primary btn-block" style="margin-bottom: 10px;">
-        Soy de Madecentro — crear o consultar un caso
+      <button id="btn-cliente" class="btn btn-primary btn-block" style="margin-bottom: 10px;">
+        Soy cliente — crear o consultar un caso
       </button>
       <button id="btn-ayj" class="btn btn-secondary btn-block">
         Soy del equipo de soporte AYJ (login Microsoft)
@@ -24,9 +24,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3/lib/msal-browser.min.js"></script>
-  <script src="js/config.js?v=20260812e"></script>
-  <script src="js/auth.js?v=20260812e"></script>
-  <script src="js/simpleAuth.js?v=20260812e"></script>
+  <script src="js/config.js?v=20260814a"></script>
+  <script src="js/auth.js?v=20260814a"></script>
+  <script src="js/simpleAuth.js?v=20260814a"></script>
   <script>
     (async function () {
       // Si ya hay sesión Microsoft activa (equipo AYJ), saltar directo.
@@ -36,9 +36,9 @@
         return;
       }
 
-      document.getElementById("btn-madecentro").addEventListener("click", () => {
+      document.getElementById("btn-cliente").addEventListener("click", () => {
         const existing = getSimpleUser();
-        window.location.href = existing ? "nuevo-caso.html" : "login-madecentro.html";
+        window.location.href = existing ? "nuevo-caso.html" : "login.html";
       });
 
       document.getElementById("btn-ayj").addEventListener("click", async () => {

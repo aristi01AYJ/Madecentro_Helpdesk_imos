@@ -47,12 +47,13 @@ async function getMisCasosPA(correo) {
 }
 
 /**
- * Trae TODOS los casos resueltos/cerrados (para el Helpdesk) a través del
- * flujo "IMOS - Casos Resueltos". El filtro por categoría se hace en el
- * navegador (ver helpdesk.html), no acá — así el flujo queda simple.
+ * Trae los casos resueltos/cerrados DEL CLIENTE del usuario logueado (para
+ * el Helpdesk) a través del flujo "IMOS - Casos Resueltos". El filtro por
+ * categoría/texto se hace en el navegador (ver helpdesk.html); el filtro
+ * por cliente se hace en el flujo, para no mezclar casos entre empresas.
  */
-async function getCasosResueltosPA() {
-  const data = await paFetch(APP_CONFIG.powerAutomate.casosResueltosUrl, {});
+async function getCasosResueltosPA(cliente) {
+  const data = await paFetch(APP_CONFIG.powerAutomate.casosResueltosUrl, { cliente });
   const items = data.casos || data.value || [];
   return items.map(mapCasoPA);
 }
@@ -80,6 +81,7 @@ function mapCasoPA(c) {
     tipoCaso: extraerValor(c.tipoCaso || c.TipoCaso),
     urgencia: extraerValor(c.urgencia || c.Urgencia),
     categoria: extraerValor(c.categoria || c.Categoria),
+    cliente: extraerValor(c.cliente || c.Cliente),
     estado: extraerValor(c.estado || c.Estado),
     solucion: c.solucion || c.Solucion,
     creadoPorNombre: c.creadoPorNombre || c.CreadoPorNombre,
